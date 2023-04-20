@@ -17,8 +17,25 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
+  build-backend:
+    docker:
+      - image: cimg/node:20.0.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Back-end build
+          command: |
+              cd backend
+              npm install
+              npm run build
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
 
 workflows:
-  default:
+  udapeople-deploy:
     jobs:
       - build-frontend
+      - build-backend
