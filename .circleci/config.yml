@@ -136,10 +136,9 @@ jobs:
               --output text >> .circleci/ansible/inventory.txt
               cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: .circleci/ansible/
           paths:
-            - .circleci/ansible/inventory.txt
-      - run: ls ~/
+            - inventory.txt
       - destroy-environment
 
   configure-infrastructure:
@@ -150,7 +149,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
       - attach_workspace:
-          at: ~/
+          at: .circleci/ansible/
       - run:
           name: Install ansible
           command: |
@@ -158,7 +157,7 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            cp ~/inventory.txt .circleci/ansible/inventory.txt
+            eat .circleci/ansible/inventory.txt
             cd .circleci/ansible/
             ansible-playbook -i inventory.txt configure-server.yml
 
