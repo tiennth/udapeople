@@ -227,8 +227,6 @@ jobs:
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
-      - node/install:
-          node-version: 13.8
       - run:
           name: Deploy frontend objects
           command: |
