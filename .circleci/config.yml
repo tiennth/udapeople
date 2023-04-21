@@ -252,7 +252,7 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible/
       - node/install:
-          node-version: 13.8
+          node-version: "13.8"
       - run:
           name: Deploy backend
           command: |
