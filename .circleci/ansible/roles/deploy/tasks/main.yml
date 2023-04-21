@@ -1,0 +1,9 @@
+---
+# - name: Copy artifact to server
+#   copy:
+#     src: artifact.tar.gz
+
+# - name: Unarchive the artifact
+#   unarchive: 
+
+

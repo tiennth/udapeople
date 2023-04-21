@@ -12,6 +12,25 @@ commands:
           command: |
             aws cloudformation delete-stack --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
             aws cloudformation delete-stack --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+  
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    # parameters:
+    #   # Add parameter here     
+    steps:
+      - restore_cache:
+          keys: [backend-build]    
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            SUCCESS = $( curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/migration_${CIRCLE_WORKFLOW_ID:0:7} )
+            if(( $SUCCESS==1 )); 
+            then
+              cd backend
+              npm install
+              npm run migration:revert
+            fi
 
 jobs:
   build-frontend:
@@ -133,12 +152,11 @@ jobs:
               aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters Name=tag:Name,Values=backend-"${CIRCLE_WORKFLOW_ID:0:7}" \
-              --output text >> .circleci/ansible/inventory.txt
-              cat .circleci/ansible/inventory.txt
+              --output text >> ~/backend_ip.txt
       - persist_to_workspace:
-          root: .circleci/ansible/
+          root: ~/
           paths:
-            - inventory.txt
+            - backend_ip.txt
       - destroy-environment
 
   configure-infrastructure:
@@ -149,7 +167,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
       - attach_workspace:
-          at: .circleci/ansible/
+          at: ~/
       - run:
           name: Install ansible
           command: |
@@ -157,9 +175,92 @@ jobs:
       - run:
           name: Run Playbook and Configure server
           command: |
-            cat .circleci/ansible/inventory.txt
-            cd .circleci/ansible/
+            cat ~/backend_ip.txt 
+            cd .circleci/ansible/ 
+            cat ~/backend_ip.txt >> inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
+      - persist_to_workspace:
+          root: .circleci/ansible/ 
+          paths:
+            - inventory.txt
+
+  run-migrations:
+    docker: 
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]      
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            # Run and save the migration output
+            npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to kvdb
+          command: |
+            if grep -q "has been executed successfully." migrations_dump.txt
+            then
+              curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            fi
+     # Here's where you will add some code to rollback on failure      
+
+  deploy-frontend:
+    docker:
+      - image: cimg/aws:2023.04
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]  
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get API URL
+          command: |
+            export BACKEND_IP=$( cat ~/backend_ip.txt )
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy-environment
+      - revert-migrations
+
+  deploy-backend:
+    docker:
+      - image: cimg/python:3.11.3
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
+      - restore_cache:
+          keys: [backend-build]
+      - attach_workspace:
+          at: .circleci/ansible/
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            pwd
+            ls -la
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
 
 workflows:
   udapeople-deploy:
@@ -178,9 +279,13 @@ workflows:
       # - scan-backend:
       #     requires:
       #       - build-backend
-      # - deploy-infrastructure
-      
       - deploy-infrastructure
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
+      - deploy-frontend:
+          requires:
+            - configure-infrastructure
+      - deploy-backend:
+          requires:
+            - configure-infrastructure
