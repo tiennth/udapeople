@@ -251,8 +251,10 @@ jobs:
           keys: [backend-build]
       - attach_workspace:
           at: .circleci/ansible/
-      - node/install:
-          node-version: "13.8"
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install nodejs
       - run:
           name: Deploy backend
           command: |
