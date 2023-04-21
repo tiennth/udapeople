@@ -139,7 +139,28 @@ jobs:
           root: ~/
           paths:
             - .circleci/ansible/inventory.txt
+      - run: ls ~/
       - destroy-environment
+
+  configure-infrastructure:
+    docker:
+      - image: cimg/python:3.11.3
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install ansible
+          command: |
+            python3 -m pip install --user ansible
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            cp ~/inventory.txt .circleci/ansible/inventory.txt
+            cd .circleci/ansible/
+            ansible-playbook -i inventory.txt configure-server.yml
 
 workflows:
   udapeople-deploy:
