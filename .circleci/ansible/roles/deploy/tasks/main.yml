@@ -5,16 +5,19 @@
 #     dest: ~/web/
 
 - name: Creates directory
+  become: true
   file:
     path: ~/web/
     state: directory
 
 - name: Unarchive the artifact
+  become: true
   unarchive: 
     src: files/artifact.tar.gz
     dest: ~/web/
 
 - name: Start app
+  become: true
   shell: |
     cd ~/web/dist
     npm install

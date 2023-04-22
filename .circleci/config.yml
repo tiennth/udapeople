@@ -35,6 +35,31 @@ commands:
               npm run migration:revert
             fi
 
+  install-awscli:
+    description: Install aws cli
+    steps:
+      - run:
+          name: Install aws cli
+          command: |
+            # Install AWS cli
+            current_dir=$( pwd )
+            cd /tmp/
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+  install-ansible:
+    description: Install ansible
+    steps:
+      - run:
+          name: Install tools
+          command: |
+            # Install ansible
+            sudo apt update
+            sudo apt install -y software-properties-common
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install -y ansible
+
 jobs:
   build-frontend:
     docker:
@@ -219,15 +244,7 @@ jobs:
           keys: [frontend-build]  
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install tools
-          command: |
-            # Install AWS cli
-            current_dir=$( pwd )
-            cd /tmp/
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+      - install-awscli
       - run:
           name: Get API URL
           command: |
@@ -258,15 +275,8 @@ jobs:
           keys: [backend-build]
       - attach_workspace:
           at: .circleci/ansible/
-      - run:
-          name: Install tools
-          command: |
-            # Install ansible
-            sudo apt update
-            sudo apt install -y software-properties-common
-            sudo add-apt-repository --yes --update ppa:ansible/ansible
-            sudo apt install -y ansible
-
+      - install-awscli
+      - install-ansible
       - run:
           name: Deploy backend
           command: |
