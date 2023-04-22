@@ -19,7 +19,7 @@
 - name: Start app
   become: true
   shell: |
-    cd ~/web/dist
+    cd ~/web/
     npm install
     pm2 stop default
     pm2 start npm -- start
