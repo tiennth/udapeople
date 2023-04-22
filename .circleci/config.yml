@@ -254,6 +254,7 @@ jobs:
           command: |
             sudo apt update
             # install nvm
+            exit 1
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash  
             # source ~/.bashrc
       - run:
@@ -269,9 +270,12 @@ jobs:
             npm run build
             cd ..
             # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
+            artifact_name=artifact.tar.gz
+            tar -C backend -czvf $artifact_name .
             pwd
             ls -la
+            cp $artifact_name .circleci/ansible/roles/deploy/files
+
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
