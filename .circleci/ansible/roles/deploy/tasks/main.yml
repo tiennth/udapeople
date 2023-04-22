@@ -4,6 +4,11 @@
 #     src: files/artifact.tar.gz
 #     dest: ~/web/
 
+- name: Creates directory
+  file:
+    path: ~/web/
+    state: directory
+
 - name: Unarchive the artifact
   unarchive: 
     src: files/artifact.tar.gz
