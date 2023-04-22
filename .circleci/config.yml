@@ -12,7 +12,6 @@ commands:
     # parameters:
       # Add parameter here   
     steps:
-      - install-awscli
       - run:
           name: Destroy environments
           when: on_fail
