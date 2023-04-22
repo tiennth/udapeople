@@ -254,9 +254,9 @@ jobs:
           command: |
             sudo apt update
             # install nvm
-            exit 1
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash  
-            # source ~/.bashrc
+            source ~/.bashrc
+            nvm --version
       - run:
           name: Install dependencies
           command: |
