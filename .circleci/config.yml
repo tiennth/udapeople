@@ -52,9 +52,10 @@ commands:
     description: Install ansible
     steps:
       - run:
-          name: Install tools
+          name: Install ansible
           command: |
-            sudo apt install -y python3-pip
+            sudo apt update
+            python3 -m pip install --upgrade pip
             python3 -m pip install --user ansible
 
 jobs:
