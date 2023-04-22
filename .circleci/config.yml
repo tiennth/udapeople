@@ -9,6 +9,8 @@ commands:
     # parameters:
       # Add parameter here   
     steps:
+      - install-awscli:
+          when: on_fail
       - run:
           name: Destroy environments
           when: on_fail
@@ -28,7 +30,7 @@ commands:
           when: on_fail
           command: |
             SUCCESS=$( curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/migration_${CIRCLE_WORKFLOW_ID:0:7} )
-            if(( $SUCCESS==1 )); 
+            if[[ $SUCCESS==1 ]]; 
             then
               cd backend
               npm install
@@ -282,13 +284,14 @@ jobs:
             cd backend
             npm i
             npm run build
+            cd ../
             
             # Zip the directory
             artifact_name=artifact-backend-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz
             tar -czvf  $artifact_name dist
+            tar -C backend -czvf $artifact_name .
             
-            cd ../
-            cp backend/"$artifact_name" .circleci/ansible/roles/deploy/files/artifact.tar.gz
+            cp "$artifact_name" .circleci/ansible/roles/deploy/files/artifact.tar.gz
 
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
@@ -362,39 +365,53 @@ jobs:
             echo Stack names: "${STACKS[@]}" 
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" =~ "${OldWorkflowID}" ]]
             then
-              # your code goes here
+              echo "Clean up resource created by ${OldWorkflowID}"
+              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             else
-              # your code goes here
+              echo "Hooray"
             fi
 
 workflows:
+  udapeople-build:
+    when:
+      not: 
+        equal: [ master, << pipeline.git.branch >> ]
+    jobs:
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: 
+            - build-frontend
+      - test-backend:
+          requires:
+            - build-backend
+      - scan-frontend:
+          requires:
+            - build-frontend
+      - scan-backend:
+          requires:
+            - build-backend
   udapeople-deploy:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: 
-      #       - build-frontend
-      # - test-backend:
-      #     requires:
-      #       - build-backend
-      # - scan-frontend:
-      #     requires:
-      #       - build-frontend
-      # - scan-backend:
-      #     requires:
-      #       - build-backend
       - deploy-infrastructure
       - configure-infrastructure:
           requires:
             - deploy-infrastructure
+      - run-migrations:
+          requires: [configure-infrastructure]
       - deploy-frontend:
           requires:
-            - configure-infrastructure
+            - run-migrations
       - deploy-backend:
           requires:
-            - configure-infrastructure
+            - run-migrations
       - smoke-test:
           requires:
             - deploy-frontend
             - deploy-backend
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
