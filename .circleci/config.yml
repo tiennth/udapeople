@@ -54,7 +54,7 @@ commands:
       - run:
           name: Install tools
           command: |
-            # Install ansible
+            sudo apt install -y python3-pip
             python3 -m pip install --user ansible
 
 jobs:
@@ -203,7 +203,7 @@ jobs:
             cat ~/backend_ip.txt 
             cd .circleci/ansible/ 
             cat ~/backend_ip.txt >> inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml -v
+            ansible-playbook -i inventory.txt configure-server.yml
       - persist_to_workspace:
           root: .circleci/ansible/ 
           paths:
@@ -291,7 +291,7 @@ jobs:
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            ansible-playbook -i inventory.txt deploy-backend.yml -v
+            ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
       - revert-migrations
 
