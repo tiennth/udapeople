@@ -212,13 +212,22 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/aws:2023.04
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
           keys: [frontend-build]  
       - attach_workspace:
           at: ~/
+      - run:
+          name: Install tools
+          command: |
+            # Install AWS cli
+            current_dir=$( pwd )
+            cd /tmp/
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
       - run:
           name: Get API URL
           command: |
@@ -240,7 +249,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/python:3.11.3
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - add_ssh_keys:
@@ -250,22 +259,14 @@ jobs:
       - attach_workspace:
           at: .circleci/ansible/
       - run:
-          name: Install nvm
+          name: Install tools
           command: |
+            # Install ansible
             sudo apt update
-            # install nvm
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash  
+            sudo apt install software-properties-common
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible
             
-            # make the nvm works instantly.
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-            nvm --version
-      - run:
-          name: Install dependencies
-          command: |
-            nvm install 13.8
-            sudo apt install npm
       - run:
           name: Deploy backend
           command: |
