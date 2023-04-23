@@ -341,6 +341,7 @@ jobs:
     docker:
       - image: cimg/aws:2023.04
     steps:
+      - checkout
       - run:
           name: "Promote new version"
           command: |
