@@ -8,7 +8,7 @@ Parameters:
 
 Resources:
   WebsiteBucket:
-    Type: AWS::S3::Bucket
+    Type: AWS::S3::Buckett
     Properties:
       BucketName: !Sub "udapeople-${ID}"
       PublicAccessBlockConfiguration:
@@ -31,7 +31,7 @@ Resources:
             ExposedHeaders: []
             MaxAge: 3000
   
-  WebsiteBucketPolicyy:
+  WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref 'WebsiteBucket'
