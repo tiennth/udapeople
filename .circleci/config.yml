@@ -195,7 +195,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
+          fingerprints: ["f1:ae:92:f7:ce:2f:b5:0b:1c:36:9b:67:0b:20:01:a4"] 
       - attach_workspace:
           at: ~/
       - run:
@@ -275,7 +275,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["18:54:d9:5b:c3:71:bd:5c:70:0b:bb:fe:a3:7e:9d:e0"] 
+          fingerprints: ["f1:ae:92:f7:ce:2f:b5:0b:1c:36:9b:67:0b:20:01:a4"] 
       - restore_cache:
           keys: [backend-build]
       - attach_workspace:
@@ -371,7 +371,7 @@ jobs:
           name: Invalidate cache
           command: |
             aws cloudfront create-invalidation \
-            --distribution-id "E3W40GGAUPCTI3" \
+            --distribution-id "E2DUDH0CXNWLCK" \
             --paths "/*"
 
   cleanup:
