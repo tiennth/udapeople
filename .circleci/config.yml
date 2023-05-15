@@ -426,6 +426,9 @@ jobs:
           command: |
             cd backend
             docker build -t tien4dev/udapeople-backend .
+      - run:
+          name: Push docker image
+          command: |
             docker push tien4dev/udapeople-backend
 
 
