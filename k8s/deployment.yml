@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udapeople-backend
+spec:
+  selector:
+    matchLabels:
+      app: udapeople-backend
+      version: "1.0"
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: udapeople-backend
+        version: "1.0"
+    spec:
+      containers:
+      - name: udapeople-backend
+        image: tien4dev/udapeople-backend
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3030
