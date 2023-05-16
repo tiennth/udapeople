@@ -431,7 +431,7 @@ jobs:
             image_name="udapeople-backend:R${new_version}"
             echo "$image_name" > imagename.txt
             cd backend
-            docker build -t tien4dev/"$IMAGE_NAME" .
+            docker build -t tien4dev/"$image_name" .
 
             curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/backend_image_version -d "${new_version}"
       - run:
