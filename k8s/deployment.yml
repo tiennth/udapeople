@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: udapeople-backend
-        image: tien4dev/udapeople-backend
+        image: tien4dev/udapeople-backend:1.0
         imagePullPolicy: Always
         ports:
         - containerPort: 3030

@@ -424,13 +424,20 @@ jobs:
       - run:
           name: Build docker image
           command: |
+            current_version=$( curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/backend_image_version )
+            echo "Current version ${current_version}"
+            # Increase by 1
+            new_version=$((current_version + 1))
+
             cd backend
-            docker build -t tien4dev/udapeople-backend .
+            docker build -t tien4dev/udapeople-backend:"R${new_version}" .
+
+            curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/backend_image_version -d "${new_version}"
       - run:
           name: Push docker image
           command: |
             docker push tien4dev/udapeople-backend
-
+    
 
 workflows:
   udapeople-pipeline:

@@ -5,6 +5,7 @@ metadata:
 spec:
   selector:
     app: udapeople-backend
+    version: "1.0"
   ports:
     - protocol: TCP
       port: 3030
