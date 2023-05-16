@@ -428,7 +428,7 @@ jobs:
             echo "Current version ${current_version}"
             # Increase by 1
             new_version=$((current_version + 1))
-            EXPORT IMAGE_NAME="udapeople-backend:R${new_version}"
+            export IMAGE_NAME="udapeople-backend:R${new_version}"
 
             cd backend
             docker build -t tien4dev/"$IMAGE_NAME" .
