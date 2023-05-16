@@ -428,8 +428,8 @@ jobs:
             echo "Current version ${current_version}"
             # Increase by 1
             new_version=$((current_version + 1))
-            export IMAGE_NAME="udapeople-backend:R${new_version}"
-
+            image_name="udapeople-backend:R${new_version}"
+            echo "$image_name" > imagename.txt
             cd backend
             docker build -t tien4dev/"$IMAGE_NAME" .
 
@@ -437,7 +437,8 @@ jobs:
       - run:
           name: Push docker image
           command: |
-            docker push tien4dev/"$IMAGE_NAME"
+            image_name=$( cat imagename.txt )
+            docker push tien4dev/"$image_name"
     
 
 workflows:
