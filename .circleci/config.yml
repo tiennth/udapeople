@@ -438,13 +438,30 @@ jobs:
           name: Push docker image
           command: |
             image_name=$( cat imagename.txt )
+            echo "Pushing image name: ${image_name}"
             docker push tien4dev/"$image_name"
-    
+
+  deploy-to-eks:
+    docker:
+      - image: cimg/aws:2023.04
+    steps:
+      - run:
+          name: Install kubectl
+          command: |
+              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+              kubectl version
+      - run:
+          name: Configure kubectl
+          command: |
+              aws eks --region us-east-1 update-kubeconfig --name udapeople
+              kubectl get pods
 
 workflows:
   udapeople-pipeline:
     jobs:
-      - build-and-push-docker-image
+      # - build-and-push-docker-image
+      - deploy-to-eks
       # - build-frontend
       # - build-backend
       # - test-frontend:
