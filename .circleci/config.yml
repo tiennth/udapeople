@@ -454,8 +454,15 @@ jobs:
       - run:
           name: Configure kubectl
           command: |
-              aws eks --region us-east-1 update-kubeconfig --name udapeople
-              kubectl get pods
+              aws eks --region us-east-1 update-kubeconfig --name udapeople2
+              kubectl version
+      
+      - run:
+          name: Deploy new version
+          command: |
+              latest_version=$( curl https://kvdb.io/7AiAwC67kGTnWWyt6acGGm/backend_image_version )
+              echo "Latest version ${latest_version}"
+              kubectl set image deployment/udapeople-backend udapeople-backend=tien4dev/udapeople-backend:"R${latest_version}"
 
 workflows:
   udapeople-pipeline:
