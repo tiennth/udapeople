@@ -409,6 +409,18 @@ jobs:
               echo "Hooray"
             fi
 
+  lint:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Linting
+          command: |
+            npm run lint
+
   build-and-push-docker-image:
     docker:
       - image: cimg/base:2023.05
@@ -467,7 +479,8 @@ workflows:
   udapeople-pipeline:
     jobs:
       # - build-and-push-docker-image
-      - deploy-to-eks
+      - lint
+      # - deploy-to-eks
       # - build-frontend
       # - build-backend
       # - test-frontend:
